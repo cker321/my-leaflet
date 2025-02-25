@@ -1,0 +1,13 @@
+.leaflet-3d-layer {
+    position: absolute;
+    width: 100%;
+    pointer-events: none;
+    transition: all 0.3s ease;
+}
+
+/* 提供主题变量以便用户自定义 */
+:root {
+    --leaflet-3d-layer-color: #3388ff;
+    --leaflet-3d-layer-height: 200px;
+    --leaflet-3d-layer-transition: all 0.3s ease;
+}

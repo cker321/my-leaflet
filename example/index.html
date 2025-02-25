@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyLeafletComponents Demo</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="../dist/index.css" />
+    <style>
+        #map {
+            height: 800px;
+            width: 100%;
+        }
+        .controls {
+            margin: 10px;
+        }
+        .controls button {
+            margin: 0 5px;
+            padding: 5px 10px;
+        }
+        #custom-control-container {
+            position: absolute;
+            top: 50px;
+            right: 10px;
+            z-index: 1000;
+        }
+        #video-container {
+            margin: 20px;
+        }
+        .error-message {
+            color: red;
+            margin: 10px;
+            padding: 10px;
+            border: 1px solid red;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+    <div id="custom-control-container"></div>
+    <div class="controls">
+        <button onclick="changeToBeijing()">跳转到北京</button>
+        <button onclick="changeToShanghai()">跳转到上海</button>
+    </div>
+    <div id="error-message" class="error-message"></div>
+    <div id="video-container"></div>
+    <script type="importmap">
+    {
+        "imports": {
+            "leaflet": "https://unpkg.com/leaflet@1.9.4/dist/leaflet-src.esm.js"
+        }
+    }
+    </script>
+    <script type="module">
+        import * as L from 'leaflet';
+        import { PlatformLeaflet, Components } from '../dist/my-leaflet-components.js';
+
+        // 初始化平台
+        PlatformLeaflet.getInstance().init({
+            token: 'your-token-here',
+            passkey: 'your-passkey-here',
+            apiUrl: 'https://api.example.com',
+            debug: true
+        });
+
+        // 初始化地图
+        const map = L.map('map').setView([29, 106.505], 10);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+        // 使用3D图层
+        const layer = Components.ThreeDLayer({
+            height: 800,
+            color: '#ff3388'
+        });
+        layer.addTo(map);
+
+        // 添加位置控制器到自定义位置
+        const centerControl = Components.ChangeCenterControl({
+            target: 'custom-control-container',
+            zoom: 12,
+            animateDuration: 1.5
+        });
+        centerControl.addTo(map);
+
+        // 添加视频播放器
+        try {
+            const videoPlayer = Components.VideoPlayerControl({
+                videoId: '12345', // 视频ID，将从API获取实际的视频URL
+                width: 800,
+                height: 450
+            });
+            await videoPlayer.addTo('video-container');
+        } catch (error) {
+            const errorElement = document.getElementById('error-message');
+            errorElement.textContent = `加载视频失败: ${error.message}`;
+            errorElement.style.display = 'block';
+        }
+
+        // 暴露方法到全局以供演示
+        window.centerControl = centerControl;
+        window.changeToBeijing = () => {
+            centerControl.setCenter(39.9042, 116.4074); // 北京坐标
+        };
+        window.changeToShanghai = () => {
+            centerControl.setCenter(31.2304, 121.4737); // 上海坐标
+        };
+    </script>
+</body>
+</html>
