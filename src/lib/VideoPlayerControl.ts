@@ -1,6 +1,7 @@
 import { createApp, h } from 'vue';
 import VideoPlayer from './components/VideoPlayer.vue';
 import { PlatformLeaflet } from './PlatformLeaflet';
+import { BaseControl, type BaseControlOptions } from './BaseControl';
 
 interface VideoInfo {
   url: string;
@@ -8,22 +9,27 @@ interface VideoInfo {
   duration?: number;
 }
 
-export interface VideoPlayerOptions {
-  target?: string | HTMLElement;
+export interface VideoPlayerOptions extends BaseControlOptions {
   videoId: string;  // 视频ID，用于从API获取视频信息
-  width?: number;
-  height?: number;
+  width?: number | string;
+  height?: number | string;
 }
 
-export class VideoPlayerControl {
+export class VideoPlayerControl extends BaseControl {
   private component: any = null;
   private container: HTMLElement | null = null;
   private app: any = null;
   private options: VideoPlayerOptions;
   private platform: PlatformLeaflet;
   private videoInfo: VideoInfo | null = null;
+  private videoUrl: string | null = null;
 
   constructor(options: VideoPlayerOptions) {
+    super({
+      ...options,
+      position: options.position || 'bottomright'
+    });
+
     this.options = {
       width: 640,
       height: 360,
@@ -74,11 +80,12 @@ export class VideoPlayerControl {
     try {
       // 获取视频信息
       this.videoInfo = await this.fetchVideoInfo();
+      this.videoUrl = this.videoInfo?.url || '';
 
       // 创建 Vue 应用
       this.app = createApp({
         render: () => h(VideoPlayer, {
-          url: this.videoInfo?.url || '',
+          url: this.videoUrl,
           width: this.options.width,
           height: this.options.height
         })

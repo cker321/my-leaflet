@@ -1,34 +1,88 @@
-import { defineConfig } from 'vite'
-import vue from '@vitejs/plugin-vue'
-import { resolve } from 'path'
+import { defineConfig } from 'vite';
+import vue from '@vitejs/plugin-vue';
+import { resolve } from 'path';
+import terser from '@rollup/plugin-terser';
 
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [vue()],
   define: {
-    'process.env': {
-      NODE_ENV: JSON.stringify(process.env.NODE_ENV)
-    }
+    'process.env': process.env
   },
   build: {
     lib: {
       entry: resolve(__dirname, 'src/lib/index.ts'),
-      name: 'MyLeafletComponents',
-      fileName: 'my-leaflet-components',
-      formats: ['es', 'umd', 'cjs']
+      formats: ['es']
     },
     rollupOptions: {
       external: ['leaflet'],
-      output: {
-        globals: {
-          leaflet: 'L'
+      output: [
+        // ES Module 完整版本
+        {
+          format: 'es',
+          preserveModules: true,
+          preserveModulesRoot: 'src/lib',
+          exports: 'named',
+          dir: 'dist/es'
         },
-        assetFileNames: (assetInfo) => {
-          if (assetInfo.name === 'style.css') return 'index.css';
-          return assetInfo.name;
+        // ES Module 压缩版本
+        {
+          format: 'es',
+          preserveModules: true,
+          preserveModulesRoot: 'src/lib',
+          exports: 'named',
+          plugins: [
+            terser({
+              format: {
+                comments: false
+              },
+              compress: {
+                drop_console: true,
+                drop_debugger: true
+              }
+            })
+          ],
+          dir: 'dist/es/min'
+        },
+        // UMD 完整版本
+        {
+          format: 'umd',
+          name: 'MyLeafletComponents',
+          entryFileNames: 'index.umd.js',
+          exports: 'auto',
+          globals: {
+            leaflet: 'L'
+          },
+          dir: 'dist'
+        },
+        // UMD 压缩版本
+        {
+          format: 'umd',
+          name: 'MyLeafletComponents',
+          entryFileNames: 'index.umd.min.js',
+          exports: 'auto',
+          globals: {
+            leaflet: 'L'
+          },
+          plugins: [
+            terser({
+              format: {
+                comments: false
+              },
+              compress: {
+                drop_console: true,
+                drop_debugger: true
+              }
+            })
+          ],
+          dir: 'dist'
         }
-      }
+      ]
     },
-    cssCodeSplit: false
+    minify: false,
+    sourcemap: true,
+    cssCodeSplit: false,
+    assetsDir: 'assets',
+    emptyOutDir: true
   }
-})
+});

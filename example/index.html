@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MyLeafletComponents Demo</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <link rel="stylesheet" href="../dist/index.css" />
+    <link rel="stylesheet" href="../dist/style.css" />
     <style>
         #map {
             height: 800px;
@@ -34,10 +34,135 @@
             border: 1px solid red;
             display: none;
         }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        }
+
+        .container {
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            line-height: 1.5;
+        }
+
+        .map-container {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        #map {
+            height: 600px;
+            width: 100%;
+        }
+
+        .controls {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f5f5f5;
+            border-radius: 4px;
+        }
+
+        .controls h2 {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .control-group {
+            margin-bottom: 15px;
+        }
+
+        .control-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .control-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        .control-group input,
+        .control-group select {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 200px;
+        }
+
+        .button {
+            background: #4a90e2;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .button:hover {
+            background: #357abd;
+        }
     </style>
 </head>
 <body>
-    <div id="map"></div>
+    <div class="container">
+        <div class="header">
+            <h1>MyLeafletComponents Demo</h1>
+            <p>这个示例展示了如何使用 MyLeafletComponents 组件库，包括图例控件、图层管理等功能。</p>
+        </div>
+
+        <div class="map-container">
+            <div id="map"></div>
+        </div>
+
+        <div class="controls">
+            <h2>控制面板</h2>
+            <div class="control-group">
+                <label for="layer-opacity">图层透明度</label>
+                <input 
+                    type="range" 
+                    id="layer-opacity" 
+                    min="0" 
+                    max="1" 
+                    step="0.1" 
+                    value="0.5"
+                >
+            </div>
+            <div class="control-group">
+                <label for="layer-color">图层颜色</label>
+                <input 
+                    type="color" 
+                    id="layer-color" 
+                    value="#ff0000"
+                >
+            </div>
+            <div class="control-group">
+                <button class="button" id="add-layer">添加新图层</button>
+            </div>
+        </div>
+    </div>
+
     <div id="custom-control-container"></div>
     <div class="controls">
         <button onclick="changeToBeijing()">跳转到北京</button>
@@ -45,18 +170,15 @@
     </div>
     <div id="error-message" class="error-message"></div>
     <div id="video-container"></div>
-    <script type="importmap">
-    {
-        "imports": {
-            "leaflet": "https://unpkg.com/leaflet@1.9.4/dist/leaflet-src.esm.js"
-        }
-    }
-    </script>
-    <script type="module">
-        import * as L from 'leaflet';
-        import { PlatformLeaflet, Components } from '../dist/my-leaflet-components.js';
-
+    
+    <!-- 引入依赖 -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="../dist/index.umd.min.js"></script>
+    
+    <script>
         // 初始化平台
+        const { PlatformLeaflet, Components } = MyLeafletComponents;
+        
         PlatformLeaflet.getInstance().init({
             token: 'your-token-here',
             passkey: 'your-passkey-here',
@@ -90,7 +212,7 @@
                 width: 800,
                 height: 450
             });
-            await videoPlayer.addTo('video-container');
+            videoPlayer.addTo('video-container');
         } catch (error) {
             const errorElement = document.getElementById('error-message');
             errorElement.textContent = `加载视频失败: ${error.message}`;
